@@ -1,0 +1,162 @@
+local player = game.Players.LocalPlayer
+local guiEnabled = false
+local bannedPlayers = {}
+local antideleteEnabled = false
+local clones = {}
+local cloningInterval = 30
+local cloningTimer = 0
+
+-- Function to create the main GUI
+local function createMainGUI()
+    local mainGui = Instance.new("ScreenGui")
+    mainGui.Name = "MainGUI"
+    mainGui.Parent = game.Players.LocalPlayer.PlayerGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = Color3.new(1, 1, 1)
+    frame.BackgroundTransparency = 0.5
+    frame.Parent = mainGui
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Text = "Script work executed\nType ;cmds to see commands"
+    textLabel.TextColor3 = Color3.new(1, 1, 1)
+    textLabel.Parent = frame
+
+    mainGui.Enabled = true
+    wait(5)
+    mainGui:Destroy()
+end
+
+-- Listen for chat commands
+player.Chatted:Connect(function(message)
+    if message == ";cmds" then
+        local commandGui = Instance.new("ScreenGui")
+        commandGui.Name = "CommandGUI"
+        commandGui.Parent = game.Players.LocalPlayer.PlayerGui
+
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(0.3, 0, 0.3, 0)
+        frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        frame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+        frame.Parent = commandGui
+
+        local closeButton = Instance.new("TextButton")
+        closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+        closeButton.Position = UDim2.new(0.9, 0, 0, 0)
+        closeButton.BackgroundColor3 = Color3.new(0.8, 0, 0)
+        closeButton.TextColor3 = Color3.new(1, 1, 1)
+        closeButton.Text = "X"
+        closeButton.Parent = frame
+        closeButton.MouseButton1Click:Connect(function()
+            commandGui:Destroy()
+            guiEnabled = false
+        end)
+
+        local commandsTextLabel = Instance.new("TextLabel")
+        commandsTextLabel.Size = UDim2.new(1, 0, 1, 0)
+        commandsTextLabel.Position = UDim2.new(0, 0, 0.1, 0)
+        commandsTextLabel.Text = ";kick (name)\n;rejoin\n;fly\n;unfly\n;antidelete"
+        commandsTextLabel.TextColor3 = Color3.new(1, 1, 1)
+        commandsTextLabel.Parent = frame
+
+        guiEnabled = true
+    elseif string.sub(message, 1, 5) == ";kick" then
+        local playerName = string.match(message, "%b()")
+        if playerName then
+            playerName = string.sub(playerName, 2, -2)
+            local playerToKick = game.Players:FindFirstChild(playerName)
+            if playerToKick then
+                local tool = Instance.new("Tool")
+                tool.Name = "Btools"
+                tool.Parent = player.Backpack
+                local function delete(targetPlayer, btools)
+                    for _, part in ipairs(targetPlayer.Character:GetChildren()) do
+                        if part:IsA("BasePart") then
+                            part:Destroy()
+                        end
+                    end
+                    btools:Destroy()
+                end
+                if tool.Parent == player.Backpack then
+                    tool.Parent = player.Character
+                    wait()
+                    delete(playerToKick, tool)
+                    wait()
+                    tool.Parent = player.Backpack
+                elseif tool.Parent == player.Character then
+                    delete(playerToKick, tool)
+                end
+            end
+        end
+    elseif message == ";rejoin" then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
+    elseif message == ";fly" then
+        createFlyPart()
+    elseif message == ";unfly" then
+        for _, part in ipairs(game.Workspace:GetChildren()) do
+            if part:IsA("Part") and part.Name == "FlyPart" then
+                part:Destroy()
+            end
+        end
+    elseif message == ";antidelete" then
+        antideleteEnabled = not antideleteEnabled
+    end
+end)
+
+-- Function to create a part for flying
+local function createFlyPart()
+    local part = Instance.new("Part")
+    part.Size = Vector3.new(5, 0.2, 5)
+    part.Anchored = true
+    part.CanCollide = false
+    part.Position = player.Character.HumanoidRootPart.Position
+    part.Name = "FlyPart"
+    part.BrickColor = BrickColor.new("Bright blue")
+    part.Parent = game.Workspace
+    local conveyor = Instance.new("VehicleSeat")
+    conveyor.Size = Vector3.new(5, 1, 5)
+    conveyor.Anchored = true
+    conveyor.CanCollide = false
+    conveyor.CFrame = part.CFrame * CFrame.new(0, 1, 0)
+    conveyor.Parent = part
+    local weld = Instance.new("WeldConstraint")
+    weld.Parent = conveyor
+    weld.Part0 = conveyor
+    weld.Part1 = part
+    local flyVelocity = 30
+    player.Character.HumanoidRootPart.CFrame = part.CFrame
+    player.Character.HumanoidRootPart.Velocity = Vector3.new(0, flyVelocity, 0)
+end
+
+-- Listen for player movements
+player.CharacterAdded:Connect(function(character)
+    character.Humanoid.StateChanged:Connect(function(oldState, newState)
+        if newState == Enum.HumanoidStateType.Jumping then
+            createFlyPart()
+        end
+    end)
+end)
+
+-- Antidelete function
+spawn(function()
+    while true do
+    wait(cloningInterval)
+    if antideleteEnabled then
+        local clone = player.Character:Clone()
+        table.insert(clones, clone)
+        clone.Parent = workspace
+        clone:SetPrimaryPartCFrame(player.Character:GetPrimaryPartCFrame() + Vector3.new(0, 1000, 0))
+        player.Character.AncestryChanged:Wait()
+        if player.Character.Parent == nil then
+            player.Character = clone
+            for _, cl in ipairs(clones) do
+                if cl ~= clone then
+                    cl:Destroy()
+                end
+            end
+            clones = {}
+        end
+    end
+end

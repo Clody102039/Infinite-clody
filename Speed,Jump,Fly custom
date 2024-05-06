@@ -1,0 +1,90 @@
+-- Create a ScreenGui and set its properties
+local gui = Instance.new("ScreenGui")
+gui.Name = "PlayerGUI"
+gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create a Frame to hold the buttons
+local frame = Instance.new("Frame")
+frame.Name = "ButtonFrame"
+frame.Size = UDim2.new(0, 200, 0, 150)
+frame.Position = UDim2.new(0.5, -100, 0, 50)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Black-gray color
+frame.Active = true -- Allow the frame to be interacted with
+frame.Draggable = true -- Make the frame draggable
+frame.Parent = gui
+
+-- Create a Close button
+local closeButton = Instance.new("TextButton")
+closeButton.Name = "CloseButton"
+closeButton.Size = UDim2.new(0, 20, 0, 20)
+closeButton.Position = UDim2.new(1, -25, 0, 5)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red color
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255) -- White color
+closeButton.Text = "X"
+closeButton.Parent = frame
+
+-- Create the Speed button
+local speedButton = Instance.new("TextButton")
+speedButton.Name = "SpeedButton"
+speedButton.Size = UDim2.new(0, 180, 0, 50)
+speedButton.Position = UDim2.new(0.5, -90, 0, 10)
+speedButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Black-gray color
+speedButton.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red color
+speedButton.Text = "Speed"
+speedButton.Parent = frame
+
+-- Create the Jump button
+local jumpButton = Instance.new("TextButton")
+jumpButton.Name = "JumpButton"
+jumpButton.Size = UDim2.new(0, 180, 0, 50)
+jumpButton.Position = UDim2.new(0.5, -90, 0, 70)
+jumpButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Black-gray color
+jumpButton.TextColor3 = Color3.fromRGB(255, 140, 0) -- Orange color
+jumpButton.Text = "Jump"
+jumpButton.Parent = frame
+
+-- Create the Fly button
+local flyButton = Instance.new("TextButton")
+flyButton.Name = "FlyButton"
+flyButton.Size = UDim2.new(0, 180, 0, 50)
+flyButton.Position = UDim2.new(0.5, -90, 0, 130)
+flyButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Black-gray color
+flyButton.TextColor3 = Color3.fromRGB(255, 255, 255) -- White color
+flyButton.Text = "Fly: OFF"
+flyButton.Parent = frame
+
+-- Connect button click events to functions for functionality
+speedButton.MouseButton1Click:Connect(function()
+    local speedInput = tonumber(prompt("Enter new speed value:"))
+    if speedInput then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speedInput
+    end
+end)
+
+jumpButton.MouseButton1Click:Connect(function()
+    local jumpInput = tonumber(prompt("Enter new jump power value:"))
+    if jumpInput then
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = jumpInput
+    end
+end)
+
+local isFlying = false
+
+flyButton.MouseButton1Click:Connect(function()
+    if isFlying then
+        flyButton.Text= "Fly: OFF"
+        isFlying=false
+        game.Players.LocalPlayer.Character.Humanoid.PlatformStand=false
+        
+    else
+        flyButton.Text= "Fly: ON"
+        isFlying=true
+        game.Players.LocalPlayer.Character.Humanoid.PlatformStand=true
+        
+    end
+    
+end)
+
+closeButton.MouseButton1Click:Connect(function()
+    gui:Destroy() -- Close the GUI by destroying it
+end)

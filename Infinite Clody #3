@@ -1,0 +1,126 @@
+-- Variables
+local CmdBar = ";cmds"
+local GSlide = "\n"
+
+-- Badge function
+local function awardBadge(player, badgeName)
+    -- Check if the badge exists
+    if game:GetService("BadgeService"):UserHasBadgeAsync(player.UserId, badgeName) then
+        return
+    end
+    -- Award the badge
+    game:GetService("BadgeService"):AwardBadge(player.UserId, badgeName)
+end
+
+-- Slide GUI function
+local function slideGUI(gui)
+    local tweenService = game:GetService("TweenService")
+    local slideDirection = UDim2.new(0, 0, 1, 0)
+    local slideInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0)
+
+    local tween = tweenService:Create(gui, slideInfo, {Position = gui.Position + slideDirection})
+    tween:Play()
+end
+
+-- Create GUI
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.Parent = player.PlayerGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 200, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -150)
+mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainFrame.BorderSizePixel = 0
+mainFrame.ZIndex = 2
+mainFrame.Parent = gui
+
+-- Add close button
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 20, 0, 20)
+closeButton.Position = UDim2.new(1, -20, 0, 0)
+closeButton.Text = "X"
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.BorderSizePixel = 0
+closeButton.ZIndex = 3
+closeButton.Parent = mainFrame
+
+-- Badge for executing script
+awardBadge(player, "ScriptByClodyBadge")
+
+-- Function to handle command input
+local function handleCommand(input)
+    if input == CmdBar then
+        -- Show commands in GUI
+        local cmdList = {
+            {";rejoin", "rejoin back"},
+            {";speed (number)", "speed player"},
+            {";jump (number)", "jump player"},
+            {";spin (number)", "spin player"},
+            {";goto (player)", "go to a player"},
+            {";tp (coordinate)", "go to a specific coordinate"},
+            {";findpart (part name)", "highlight a targeted part"},
+            {";unfindpart", "unhighlight a part"},
+            {";seepart", "see all part names in the game"},
+            {";airwalk", "can't fall"},
+            {";unairwalk", "turn off the airwalk"}
+        }
+
+        local cmdText = ""
+        for i, cmd in ipairs(cmdList) do
+            cmdText = cmdText .. cmd[1] .. " *" .. cmd[2] .. "*" .. GSlide
+        end
+
+        -- Create command GUI
+        local commandGui = Instance.new("Frame")
+        commandGui.Size = UDim2.new(1, 0, 1, 0)
+        commandGui.Position = UDim2.new(0, 0, 0, 0)
+        commandGui.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        commandGui.BorderSizePixel = 0
+        commandGui.Parent = gui
+
+        -- Create text label for commands
+        local commandLabel = Instance.new("TextLabel")
+        commandLabel.Size = UDim2.new(1, 0, 1, 0)
+        commandLabel.Position = UDim2.new(0, 0, 0, 0)
+        commandLabel.BackgroundTransparency = 1
+        commandLabel.Text = cmdText
+        commandLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        commandLabel.TextStrokeTransparency = 0
+        commandLabel.Font = Enum.Font.SourceSans
+        commandLabel.TextSize = 18
+        commandLabel.TextWrapped = true
+        commandLabel.ZIndex = 3
+        commandLabel.Parent = commandGui
+
+        -- Close button functionality
+        closeButton.MouseButton1Click:Connect(function()
+            commandGui:Destroy()
+        end)
+    end
+end
+
+-- Command input event
+player.Chatted:Connect(function(msg)
+    handleCommand(msg)
+end)
+
+-- Update/check script function
+local function updateScript()
+    -- Check if something is wrong
+    if not pcall(function()
+        -- Insert script logic here
+    end) then
+        -- Award badge for error
+        awardBadge(player, "SomethingIsWrongBadge")
+        -- Change GUI color to red transparent
+        mainFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        mainFrame.BackgroundTransparency = 0.5
+    end
+end
+
+-- Check/update script every 0.001 second
+while true do
+    wait(0.001)
+    updateScript()
+end

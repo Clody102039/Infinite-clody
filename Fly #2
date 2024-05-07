@@ -1,0 +1,84 @@
+-- Define variables
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local camera = game.Workspace.CurrentCamera
+local flyPart = Instance.new("Part")
+flyPart.Name = "FlyPart"
+flyPart.Size = Vector3.new(3, 5, 3)
+flyPart.Transparency = 0.5
+flyPart.Anchored = true
+flyPart.CanCollide = false
+flyPart.Parent = game.Workspace
+
+-- Create GUI
+local gui = Instance.new("ScreenGui")
+gui.Parent = player.PlayerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 150)
+frame.Position = UDim2.new(0.5, -100, 0, 100)
+frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red color
+frame.BackgroundTransparency = 0.75 -- 75% transparent
+frame.Active = true -- Allow the frame to be interacted with
+frame.Draggable = true -- Make the frame draggable
+frame.Parent = gui
+
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(1, 0, 0, 30)
+speedLabel.Position = UDim2.new(0, 0, 0, 10)
+speedLabel.Text = "Speed:"
+speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White color
+speedLabel.TextSize = 18
+speedLabel.Parent = frame
+
+local speedInput = Instance.new("TextBox")
+speedInput.Size = UDim2.new(0.6, 0, 0, 30)
+speedInput.Position = UDim2.new(0.2, 0, 0, 10)
+speedInput.Text = "0"
+speedInput.TextColor3 = Color3.fromRGB(0, 0, 0) -- Black color
+speedInput.Parent = frame
+
+local onOffButton = Instance.new("TextButton")
+onOffButton.Size = UDim2.new(1, -20, 0, 40)
+onOffButton.Position = UDim2.new(0.5, -100, 0, 70)
+onOffButton.TextColor3 = Color3.fromRGB(255, 255, 255) -- White color
+onOffButton.FontSize=18
+onOffButton.TextWrapped=true
+onOffButton.TextScaled=true
+onOffButton.BackgroundColor3=Color3.fromRGB(50,50,50) -- Black-gray color
+onOffButton.Text="OFF"
+onOffButton.Parent=frame
+
+-- Functions
+local function updateSpeed()
+    local speed = tonumber(speedInput.Text)
+    if speed then
+        flyPart.CFrame = flyPart.CFrame * CFrame.new(0, 0, speed)
+    end
+end
+
+local function toggleScript()
+    if on then
+        onOffButton.Text="OFF"
+        flyPart:Destroy()
+        on=false
+    else 
+        onOffButton.Text="ON"
+        flyPart.Position=character.HumanoidRootPart.Position 
+        flyPart.CFrame=character.HumanoidRootPart.CFrame 
+        flyPart.Parent=character 
+        on=true 
+    end 
+end 
+
+-- Connect GUI events 
+speedInput.FocusLost:Connect(updateSpeed) 
+onOffButton.MouseButton1Click:Connect(toggleScript)
+
+-- Loop to update flyPart position and rotation 
+game:GetService("RunService").Stepped:Connect(function() 
+    if on then 
+        flyPart.Position=character.HumanoidRootPart.Position 
+        flyPart.CFrame=CFrame.new(flyPart.Position,flyPart.Position+camera.CFrame.LookVector) 
+    end 
+end)

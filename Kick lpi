@@ -1,0 +1,79 @@
+-- Function to create and show the "SCRIPT WORK!!" GUI
+local function showScriptWorkGUI()
+    local gui = Instance.new("ScreenGui")
+    gui.Parent = game.Players.LocalPlayer.PlayerGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    frame.BorderSizePixel = 0
+    frame.ZIndex = 10
+    frame.Parent = gui
+
+    local label = Instance.new("TextLabel")
+    label.Text = "SCRIPT WORK!!"
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.TextColor3 = Color3.fromRGB(0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.FontSize = Enum.FontSize.Size48
+    label.Parent = frame
+
+    wait(5)
+
+    gui:Destroy()
+end
+
+-- Function to equip the tool ("F3X" or "Building Tools") to the player
+local function equipTool(player)
+    local tool = player.Backpack:FindFirstChild("F3X") or player.Backpack:FindFirstChild("Building Tools")
+    if not tool then
+        -- Equip the tool if not found
+        tool = Instance.new("Tool")
+        tool.Name = "F3X"  -- or "Building Tools"
+        tool.Parent = player.Backpack
+    end
+    return tool
+end
+
+-- Function to handle abbreviated names for the !kick command
+local function getTargetPlayerFromAbbreviation(abbreviation)
+    abbreviation = abbreviation:lower()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        local abbreviatedName = string.sub(player.Name, 1, #abbreviation)
+        if abbreviatedName:lower() == abbreviation then
+            return player
+        end
+    end
+    return nil
+end
+
+-- Function to handle chat commands
+local function handleChatCommand(player, message)
+    local command, targetPlayerName = message:match("^!(%w+)%s+(.+)$")
+    if command then
+        command = command:lower()  -- Convert the command to lowercase for case-insensitive comparison
+        targetPlayerName = targetPlayerName:lower()
+
+        if command == "kick" then
+            local targetPlayer = getTargetPlayerFromAbbreviation(targetPlayerName)
+            if targetPlayer then
+                local tool = equipTool(player)
+                tool:Activate()
+                tool:FindFirstChildOfClass("BindableFunction"):FindFirstChildOfClass("RemoteFunction"):InvokeServer("UndoRemove", {targetPlayer})
+            else
+                -- Handle case when target player is not found
+                print("Player not found or abbreviation is ambiguous.")
+            end
+        end
+    end
+end
+
+-- Connect the chat event to the handler function
+game.Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        handleChatCommand(player, message)
+    end)
+end)
+
+-- Test the script
+showScriptWorkGUI()

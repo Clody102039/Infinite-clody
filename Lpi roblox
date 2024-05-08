@@ -1,0 +1,34 @@
+-- Function to handle chat commands
+local function handleChatCommand(player, message)
+    local command, targetPlayerName = message:match("^!([%w_]+)%s+(.+)$")
+    if command then
+        command = command:lower()  -- Convert the command to lowercase for case-insensitive comparison
+        targetPlayerName = targetPlayerName:lower()
+        if isAdmin(player) then
+            local tool = getTool(player)
+            if not tool then
+                equipTool(player)
+                tool = getTool(player)
+            end
+            if tool then
+                for _, targetPlayer in ipairs(game.Players:GetPlayers()) do
+                    if targetPlayer.Name:lower() == targetPlayerName or targetPlayer.DisplayName:lower() == targetPlayerName then
+                        if command == "kill" then
+                            -- Kill the player by removing the neck part
+                            local character = targetPlayer.Character
+                            if character then
+                                local neck = character:FindFirstChild("Neck")
+                                if neck then
+                                    neck:Destroy()
+                                end
+                            end
+                        elseif command == "kick" then
+                            -- Kick the player using the provided tool
+                            kickPlayer(targetPlayer, tool)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end

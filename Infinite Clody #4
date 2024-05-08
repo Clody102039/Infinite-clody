@@ -1,0 +1,101 @@
+-- Function to create and show the "Infinite Clody" GUI
+local function showInfiniteClodyGUI()
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "InfiniteClodyGUI"
+    gui.Parent = game.Players.LocalPlayer.PlayerGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 69, 0) -- Red-Orange color
+    frame.BackgroundTransparency = 0.75 -- 25% transparency
+    frame.BorderSizePixel = 0
+    frame.ZIndex = 10
+    frame.Parent = gui
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Text = "Infinite Clody"
+    titleLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    titleLabel.Position = UDim2.new(0, 0, 0.25, 0)
+    titleLabel.TextColor3 = Color3.fromRGB(128, 128, 128) -- Gray color
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.FontSize = Enum.FontSize.Size72
+    titleLabel.FontWeight = Enum.FontWeight.Bold
+    titleLabel.Parent = frame
+
+    local infoLabel = Instance.new("TextLabel")
+    infoLabel.Text = "Type $cmds"
+    infoLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    infoLabel.Position = UDim2.new(0, 0, 0.75, 0)
+    infoLabel.TextColor3 = Color3.fromRGB(128, 128, 128) -- Gray color
+    infoLabel.BackgroundTransparency = 1
+    infoLabel.FontSize = Enum.FontSize.Size24
+    infoLabel.Parent = frame
+
+    wait(5)
+
+    gui:Destroy()
+end
+
+-- Function to create and show the command GUI
+local function showCommandGUI()
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "CommandGUI"
+    gui.Parent = game.Players.LocalPlayer.PlayerGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0.2, 0, 0.2, 0)
+    frame.Position = UDim2.new(0.8, 0, 0.8, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    frame.BackgroundTransparency = 0.5
+    frame.BorderSizePixel = 2
+    frame.BorderColor3 = Color3.fromRGB(128, 128, 128)
+    frame.ZIndex = 10
+    frame.Parent = gui
+
+    local closeButton = Instance.new("TextButton")
+    closeButton.Text = "X"
+    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+    closeButton.Position = UDim2.new(0.9, 0, 0, 0)
+    closeButton.BackgroundColor3 = Color3.fromRGB(128, 128, 128) -- Gray color
+    closeButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+    closeButton.FontSize = Enum.FontSize.Size24
+    closeButton.BorderSizePixel = 0
+    closeButton.ZIndex = 11
+    closeButton.Parent = frame
+
+    local commandBar = Instance.new("TextBox")
+    commandBar.Size = UDim2.new(1, 0, 0.9, 0)
+    commandBar.Position = UDim2.new(0, 0, 0.1, 0)
+    commandBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    commandBar.BorderColor3 = Color3.fromRGB(128, 128, 128)
+    commandBar.PlaceholderText = "Type your command here..."
+    commandBar.FontSize = Enum.FontSize.Size18
+    commandBar.Parent = frame
+
+    closeButton.MouseButton1Click:Connect(function()
+        gui:Destroy()
+    end)
+end
+
+-- Function to spawn smoke effect
+local function spawnSmokeEffect()
+    -- You need to implement this function based on your needs
+end
+
+-- Connect the chat event to handle command input
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    if message:sub(1, 1) == "$" then
+        local command = message:sub(2)
+        if command == "cmds" then
+            showCommandGUI()
+        else
+            -- Execute the command based on user input
+            -- You need to implement command execution based on your needs
+        end
+    end
+end)
+
+-- Test the script
+showInfiniteClodyGUI()
+wait(0.1)
+spawnSmokeEffect()

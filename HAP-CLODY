@@ -1,0 +1,200 @@
+local highlightedParts = {}
+local invisiblePartsDataStore = game:GetService("DataStoreService"):GetDataStore("InvisiblePartsDataStore")
+local invisiblePartsData
+local guiSettings = {
+    backgroundColor = Color3.fromRGB(45, 45, 45),
+    buttonColor = Color3.fromRGB(60, 60, 60),
+    textColor = Color3.fromRGB(255, 255, 255),
+    highlightColor = Color3.fromRGB(46, 139, 87),
+    meshVisibility = true
+}
+local gui
+local isDragging = false
+local lastTouchPosition = nil
+
+local function highlightParts()
+    for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if part:IsA("BasePart") then
+            highlightedParts[part] = {Color = part.Color, Transparency = part.Transparency}
+            part.Color = guiSettings.highlightColor
+            part.Transparency = 0.5
+        end
+    end
+end
+
+local function removeHighlight()
+    for part, properties in pairs(highlightedParts) do
+        part.Color = properties.Color
+        part.Transparency = properties.Transparency
+    end
+    highlightedParts = {}
+
+    if invisiblePartsData then
+        for _, partName in ipairs(invisiblePartsData) do
+            local part = game:GetService("Workspace"):FindFirstChild(partName)
+            if part and part:IsA("BasePart") then
+                part.Visible = false
+            end
+        end
+    end
+end
+
+local function loadInvisibleParts()
+    invisiblePartsData = invisiblePartsDataStore:GetAsync("InvisibleParts") or {}
+end
+
+local function saveInvisibleParts()
+    local invisibleParts = {}
+    for _, part in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if part:IsA("BasePart") and not part.Visible then
+            table.insert(invisibleParts, part.Name)
+        end
+    end
+    invisiblePartsDataStore:SetAsync("InvisibleParts", invisibleParts)
+end
+
+local function createGUI()
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "HighlighterGUI"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.DisplayOrder = 10
+
+    local CustomShapeFrame = Instance.new("Frame")
+    CustomShapeFrame.Parent = ScreenGui
+    CustomShapeFrame.Size = UDim2.new(0, 180, 0, 50)
+    CustomShapeFrame.Position = UDim2.new(1, -200, 0, -50)
+    CustomShapeFrame.BackgroundColor3 = guiSettings.backgroundColor
+    CustomShapeFrame.BorderSizePixel = 0
+    CustomShapeFrame.ClipsDescendants = true
+    CustomShapeFrame.ZIndex = 2
+    CustomShapeFrame.Rotation = 45
+
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Parent = CustomShapeFrame
+    ToggleButton.Size = UDim2.new(0.6, 0, 0.8, 0)
+    ToggleButton.Position = UDim2.new(0.05, 0, 0.1, 0)
+    ToggleButton.BackgroundColor3 = guiSettings.buttonColor
+    ToggleButton.BorderSizePixel = 0
+    ToggleButton.Text = "Toggle Highlight"
+    ToggleButton.TextColor3 = guiSettings.textColor
+    ToggleButton.ZIndex = 2
+
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Parent = CustomShapeFrame
+    CloseButton.Size = UDim2.new(0.2, 0, 0.2, 0)
+    CloseButton.Position = UDim2.new(0.75, 0, 0.1, 0)
+    CloseButton.BackgroundColor3 = guiSettings.buttonColor
+    CloseButton.BorderSizePixel = 0
+    CloseButton.Text = "X"
+    CloseButton.TextColor3 = guiSettings.textColor
+    CloseButton.ZIndex = 2
+
+    local BackgroundFrame = Instance.new("Frame")
+    BackgroundFrame.Parent = ScreenGui
+    BackgroundFrame.Size = UDim2.new(1, 0, 1, 0)
+    BackgroundFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+    BackgroundFrame.BackgroundTransparency = 0.5
+    BackgroundFrame.BorderSizePixel = 0
+    BackgroundFrame.Visible = false
+    BackgroundFrame.ZIndex = 1
+
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+    -- Button animations
+    local function animateButton(button)
+        local originalSize = button.Size
+        local originalColor = button.BackgroundColor3
+
+        local function animateSize(targetSize, duration)
+            button:TweenSize(targetSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quint, duration, true)
+        end
+
+        local function animateColor(targetColor, duration)
+            button:TweenColor(targetColor, Enum.EasingDirection.Out, Enum.EasingStyle.Quint, duration, true)
+        end
+
+        button.MouseEnter:Connect(function()
+            animateSize(UDim2.new(0.65, 0, 0.85, 0), 0.2)
+            animateColor(guiSettings.buttonColor:lerp(Color3.new(0, 0, 0), 0.3), 0.2)
+        end)
+
+        button.MouseLeave:Connect(function()
+            animateSize(originalSize, 0.2)
+            animateColor(originalColor, 0.2)
+        end)
+
+        button.MouseButton1Click:Connect(function()
+            animateSize(UDim2.new(0.6, 0, 0.8, 0), 0.1)
+            animateColor(guiSettings.buttonColor:lerp(Color3.new(0, 0, 0), 0.3), 0.1)
+        end)
+    end
+
+    animateButton(ToggleButton)
+    animateButton(CloseButton)
+
+    ToggleButton.MouseButton1Click:Connect(toggleHighlight)
+    CloseButton.MouseButton1Click:Connect(closeGUI)
+
+    -- Make GUI draggable on touch devices
+    local function onTouchBegan(touchPosition)
+        lastTouchPosition = touchPosition
+        isDragging = true
+    end
+
+    local function onTouchMoved(touchPosition)
+        if isDragging then
+            local delta = touchPosition - lastTouchPosition
+            ScreenGui.Position = UDim2.new(ScreenGui.Position.X.Scale, ScreenGui.Position.X.Offset + delta.X, ScreenGui.Position.Y.Scale, ScreenGui.Position.Y.Offset + delta.Y)
+            lastTouchPosition = touchPosition
+        end
+    end
+
+    local function onTouchEnded()
+        isDragging = false
+    end
+
+    ScreenGui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            onTouchMoved(input.Position)
+        end
+    end)
+
+    ScreenGui.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            onTouchEnded()
+        end
+    end)
+
+    return ScreenGui
+end
+
+local function toggleHighlight()
+    if gui.ToggleButton.Text == "Toggle Highlight" then
+        highlightParts()
+        gui.ToggleButton.Text = "Turn Off Highlight"
+    else
+        removeHighlight()
+        gui.ToggleButton.Text = "Toggle Highlight"
+    end
+end
+
+local function closeGUI()
+    removeHighlight()
+    saveInvisibleParts()
+    gui.ScreenGui:Destroy()
+end
+
+local function loadGUI()
+    gui = createGUI()
+end
+
+loadGUI()
+
+game:GetService("Workspace").DescendantAdded:Connect(function(descendant)
+    updateHighlightedParts()
+end)
+
+local success, error = pcall(loadInvisibleParts)
+if not success then
+    warn("Error loading invisible parts: " .. error)
+end

@@ -1,0 +1,340 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local plr = Players.LocalPlayer
+local SelectedPlayers = {}
+local Toggle1 = false
+local Toggle2 = false
+local prefix = ""
+
+function round(num, numDecimalPlaces)
+	local mult = 10^(numDecimalPlaces or 0)
+	return math.floor(num * mult + 0.5) / mult
+end
+
+function GetPath()
+	local ToolName = "F3X" or "Building Tools"
+	local Tool = plr.Character:FindFirstChild(ToolName) or plr.Backpack:FindFirstChild(ToolName)
+	return Tool
+end
+
+function Delete(instance, tool)
+	tool:FindFirstChildOfClass("BindableFunction"):FindFirstChildOfClass("RemoteFunction"):InvokeServer("UndoRemove", {instance})
+end
+function Anchor(instance, tool)
+	tool:FindFirstChildOfClass("BindableFunction"):FindFirstChildOfClass("RemoteFunction"):InvokeServer("SyncAnchor", {instance})
+end
+
+local function findPlayer(stringg)
+	for _, v in pairs(Players:GetPlayers()) do
+		if stringg:lower() == (v.Name:lower()):sub(1, #stringg) then
+			return v
+		end
+	end
+end
+
+
+game.Players.LocalPlayer.Chatted:Connect(function(msg)
+	local args = msg:split(" ")
+	local scriptt = args[1]
+	local plrr = args[2]
+	if scriptt == ">kick" then
+		local Tool = GetPath()
+		local Playa = findPlayer(plrr)
+
+		local function Task()
+			if Playa then
+				Delete(Playa, Tool)
+			else
+				return
+			end
+		end
+
+		if Tool.Parent == plr.Backpack then
+			Tool.Parent = plr.Character
+			wait()
+			Task()
+			wait()
+			Tool.Parent = plr.Backpack
+		elseif Tool.Parent == plr.Character then
+			Task()
+		end
+
+	end
+	if scriptt == ">kill" then
+		local Tool = GetPath()
+		local playa = findPlayer(plrr)
+		local function Task()
+			if playa then
+				Delete(playa.Character.Torso:FindFirstChild("Neck"), Tool)
+			else
+				return
+			end
+		end
+
+		if Tool.Parent == plr.Backpack then
+			Tool.Parent = plr.Character
+			wait()
+			Task()
+			wait()
+			Tool.Parent = plr.Backpack
+		elseif Tool.Parent == plr.Character then
+			Task()
+		end
+	end
+	if scriptt == ">freeze" then
+		local Tool = GetPath()
+		local playa = findPlayer(plrr)
+		local function Task()
+			if playa then
+				Anchor(playa.Character.Torso, Tool)
+			else
+				return
+			end
+			if Tool.Parent == plr.Backpack then
+				Tool.Parent = plr.Character
+				wait()
+				Task()
+				wait()
+				Tool.Parent = plr.Backpack
+			elseif Tool.Parent == plr.Character then
+				Task()
+			end
+		end
+	end
+	if scriptt == ">punish" then
+		local Tool = GetPath()
+		local playaa = findPlayer(plrr)
+		local function Task()
+			if playaa then
+				Delete(playaa.Character, Tool)
+			else
+				return
+			end
+		end
+		if Tool.Parent == plr.Backpack then
+			Tool.Parent = plr.Character
+			wait()
+			Task()
+			wait()
+			Tool.Parent = plr.Backpack
+		elseif Tool.Parent == plr.Character then
+			Task()
+		end
+	end
+	if scriptt == ">gears" then
+		local Tool = GetPath()
+		local function Task()
+			local Gearboards = {
+				workspace:FindFirstChild("made by FoxBin"), 
+				workspace:FindFirstChild("made by FoxBin1"),
+				workspace:FindFirstChild("made byFoxBin MK2"),
+				workspace:FindFirstChild("made by FoxBinMK4"),
+				workspace:FindFirstChild("made by FoxBinMK6")
+			}
+			for i,v in ipairs(Gearboards) do
+				if v then
+					Delete(v, Tool)
+				end
+			end
+		end
+		if Tool.Parent == plr.Backpack then
+			Tool.Parent = plr.Character
+			wait()
+			Task()
+			wait()
+			Tool.Parent = plr.Backpack
+		elseif Tool.Parent == plr.Character then
+			Task()
+		end
+	end
+	if scriptt == ">loadout" then
+		local Tool = GetPath()
+		local function Task()
+			local load = workspace:FindFirstChild("GearBoardManagerModel")
+			Delete(load, Tool)
+		end
+		if Tool.Parent == plr.Backpack then
+			Tool.Parent = plr.Character
+			wait()
+			Task()
+			wait()
+		elseif	Tool.Parent == plr.Character then
+			Task()
+		end
+	end
+	if scriptt == ">f3x" then
+		local Tool = GetPath()
+		local function Task()
+			local F3XGiver
+			local SafePlate = workspace:FindFirstChild("SafePlate")
+			for i,v in pairs(SafePlate.Mesh.Value:GetDescendants()) do
+				if v.Name == "Bricks" and v:FindFirstChild("Bar") then
+					F3XGiver = v.Parent
+				end
+			end
+			Delete(F3XGiver, Tool)
+		end
+		if Tool.Parent == plr.Backpack then
+			Tool.Parent = plr.Character
+			wait()
+			Task()
+			wait()
+			Tool.Parent = plr.Backpack
+		elseif Tool.Parent == plr.Character then
+			Task()
+		end
+	end
+	if scriptt == ">btools" then
+		local Tool = GetPath()
+		local function Task()
+			local BtoolsGiver
+			local SafePlate = workspace:FindFirstChild("SafePlate")
+			for i,v in pairs(SafePlate.Mesh.Value:GetDescendants()) do
+				if v.Name == "Bricks" and not v:FindFirstChild("Bar") then
+					BtoolsGiver = v.Parent
+				end
+			end
+			Delete(BtoolsGiver, Tool)
+		end
+		if Tool.Parent == plr.Backpack then
+			Tool.Parent = plr.Character
+			wait()
+			Task()
+			wait()
+			Tool.Parent = plr.Backpack
+		elseif Tool.Parent == plr.Character then
+			Task()
+		end
+	end
+	if scriptt == ">gf3x" then
+		local char = plr.Character
+		local x = char.Torso.CFrame
+		char.Torso.CFrame = CFrame.new(10.4952431, 3.19999933, -115.600372, 0.00916903745, 8.72526829e-10, 0.999957979, 1.01636338e-07, 1, -1.8045101e-09, -0.999957979, 1.0164861e-07, 0.00916903745)
+		wait(0.49)
+		char.Torso.CFrame = x
+	end
+	
+	if scriptt == ">map" then
+		local char = plr.Character
+		char.Torso.CFrame = CFrame.new(-55.9761848, 3.19999933, -123.24926, 0.996610522, -7.89314356e-08, 0.0822648257, 7.73851099e-08, 1, 2.19853664e-08, -0.0822648257, -1.55447744e-08, 0.996610522)
+	end
+	if scriptt == ">fanum" then
+		local char = plr.Character
+		local x = char.Torso.CFrame
+		wait(0.001)
+		plr.PlayerGui.DJSurfaceGui.TopBox.Text = "16190757458"
+		char.Torso.CFrame = CFrame.new(29.2835426, 3.16615629, -90.2359772, -0.147373274, 1.47170214e-08, 0.989080966, 1.18697741e-07, 1, 2.80649703e-09, -0.989080966, 1.17815276e-07, -0.147373274)
+		wait(1.5)
+		char.Torso.CFrame = x
+	end
+		if scriptt == ">music" then
+			local Tool = GetPath()
+			local function Task()
+				local MusicModel = workspace:FindFirstChild("FoxBin'sDjBoard")
+				local MusicPlayer = MusicModel:FindFirstChild("Brain")
+				Delete(MusicPlayer, Tool)
+			end
+			if Tool.Parent == plr.Backpack then
+				Tool.Parent = plr.Character
+				wait()
+				Task()
+				wait()
+				Tool.Parent = plr.Backpack
+			elseif Tool.Parent == plr.Character then
+				Task()
+			end
+	end
+	    if scriptt == ">bricks" then
+		local Tool = GetPath()
+		local function Task()
+			local brick = workspace:FindFirstChild("Bricks")
+			if brick then
+				Delete(brick, Tool)
+			else return end
+		end
+
+		if Tool.Parent == plr.Backpack then
+			Tool.Parent = plr.Character
+			wait()
+			Task()
+			wait()
+		elseif Tool.Parent == plr.Character then
+			Task()
+		end
+	end
+		if scriptt == ">bplate" then
+			local Tool = GetPath()
+			local function Task()
+				local base = workspace:FindFirstChild("Baseplate")
+				if base then
+					Delete(base, Tool)
+				else return end
+			end
+
+			if Tool.Parent == plr.Backpack then
+				Tool.Parent = plr.Character
+				wait()
+				Task()
+				wait()
+			elseif Tool.Parent == plr.Character then
+				Task()
+		end
+		if scriptt == ">all" then
+			local Tool = GetPath()
+
+			local function Task()
+				local gearboardNames = {
+					"made by FoxBin",
+					"made by FoxBin1",
+					"made by FoxBin MK2",
+					"made by FoxBinMK4",
+					"made by FoxBinMK6"
+				}
+				for _, gearboardName in ipairs(gearboardNames) do
+					local gearboard = workspace:FindFirstChild(gearboardName)
+					if gearboard then
+						Delete(gearboard, Tool)
+					end
+				end
+
+				local base = workspace:FindFirstChild("Baseplate")
+				if base then
+					Delete(base, Tool)
+				end
+			end
+
+			-- Move tool to character, perform task, then move it back to backpack if necessary
+			if Tool.Parent == plr.Backpack then
+				Tool.Parent = plr.Character
+				wait()
+				Task()
+				wait()
+				Tool.Parent = plr.Backpack
+			elseif Tool.Parent == plr.Character then
+				Task()
+			end
+		end
+
+	        if scriptt == ">museum" then
+		local Tool = GetPath()
+
+		local function Task()
+			local museum = workspace:FindFirstChild("LPI Museum V.2 By Cobleth"):GetDescendants()
+			if museum then
+				Delete(museum, Tool)
+			else
+				return
+			end
+				if Tool.Parent == plr.Backpack then
+					Tool.Parent = plr.Character
+					wait()
+					Task()
+					wait()
+				elseif Tool.Parent == plr.Character then
+					Task()
+					
+				end
+				end
+			end
+		end  
+end)
